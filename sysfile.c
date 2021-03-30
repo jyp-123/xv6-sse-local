@@ -241,6 +241,7 @@ bad:
 static struct inode*
 create(char *path, short type, short major, short minor)
 {
+  uint off;
   struct inode *ip, *dp;
   char name[DIRSIZ];
 
@@ -248,7 +249,7 @@ create(char *path, short type, short major, short minor)
     return 0;
   ilock(dp);
 
-  if((ip = dirlookup(dp, name, 0)) != 0){
+  if((ip = dirlookup(dp, name, &off)) != 0){
     iunlockput(dp);
     ilock(ip);
     if(type == T_FILE && ip->type == T_FILE)
@@ -441,4 +442,28 @@ sys_pipe(void)
   fd[0] = fd0;
   fd[1] = fd1;
   return 0;
+}
+
+int sys_swapread(void)
+{
+	char* ptr;
+	int blkno;
+
+	if(argptr(0, &ptr, PGSIZE) < 0 || argint(1, &blkno) < 0 )
+		return -1;
+
+	swapread(ptr, blkno);
+	return 0;
+}
+
+int sys_swapwrite(void)
+{
+	char* ptr;
+	int blkno;
+
+	if(argptr(0, &ptr, PGSIZE) < 0 || argint(1, &blkno) < 0 )
+		return -1;
+
+	swapwrite(ptr, blkno);
+	return 0;
 }

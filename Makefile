@@ -91,7 +91,7 @@ CFLAGS += -fno-pie -nopie
 endif
 
 xv6.img: bootblock kernel
-	dd if=/dev/zero of=xv6.img count=10000
+	dd if=/dev/zero of=xv6.img count=100000
 	dd if=bootblock of=xv6.img conv=notrunc
 	dd if=kernel of=xv6.img seek=1 conv=notrunc
 
@@ -139,6 +139,7 @@ kernelmemfs: $(MEMFSOBJS) entry.o entryother initcode kernel.ld fs.img
 
 tags: $(OBJS) entryother.S _init
 	etags *.S *.c
+	ctags *.S *.c
 
 vectors.S: vectors.pl
 	./vectors.pl > vectors.S
@@ -181,6 +182,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_swaptest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -264,6 +266,7 @@ dist:
 	sed '/CUT HERE/,$$d' Makefile >dist/Makefile
 	echo >dist/runoff.spec
 	cp $(EXTRA) dist
+	chmod +x dist/vectors.pl
 
 dist-test:
 	rm -rf dist
@@ -272,8 +275,8 @@ dist-test:
 	mkdir dist-test
 	cp dist/* dist-test
 	cd dist-test; $(MAKE) print
-	cd dist-test; $(MAKE) bochs || true
-	cd dist-test; $(MAKE) qemu
+	#cd dist-test; $(MAKE) bochs || true
+	cd dist-test; $(MAKE) qemu-nox
 
 # update this rule (change rev#) when it is time to
 # make a new revision.
